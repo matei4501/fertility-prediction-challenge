@@ -8,6 +8,11 @@ It is important to document your training steps here, including seed,
 number of folds, model, et cetera
 """
 
+from sklearn.ensemble import HistGradientBoostingClassifier
+import pandas as pd
+import random
+import joblib
+
 def train_save_model(cleaned_df, outcome_df):
     """
     Trains a model using the cleaned dataframe and saves the model to a file.
@@ -25,12 +30,12 @@ def train_save_model(cleaned_df, outcome_df):
 
     # Filter cases for whom the outcome is not available
     model_df = model_df[~model_df['new_child'].isna()]  
-    
-    # Logistic regression model
-    model = LogisticRegression()
 
-    # Fit the model
-    model.fit(model_df[['age']], model_df['new_child'])
+    X = model_df.drop(columns=["nomem_encr", "new_child"])
+    y = model_df["new_child"]
+    model = HistGradientBoostingClassifier(learning_rate=0.1, max_iter=1000)
+    model.fit(X, y)
 
     # Save the model
     joblib.dump(model, "model.joblib")
+
