@@ -12,6 +12,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 import pandas as pd
 import random
 import joblib
+from xgboost import XGBClassifier
 
 def train_save_model(cleaned_df, outcome_df):
     """
@@ -31,11 +32,22 @@ def train_save_model(cleaned_df, outcome_df):
     # Filter cases for whom the outcome is not available
     model_df = model_df[~model_df['new_child'].isna()]  
 
-    X = model_df.drop(columns=["nomem_encr", "new_child"])
+    X = model_df.drop(columns=["nomem_encr", "new_child", "outcome_available"])
     y = model_df["new_child"]
-    model = HistGradientBoostingClassifier(learning_rate=0.1, max_iter=1000)
-    model.fit(X, y)
+
+    params = {'learning_rate': 0.02091617422015919,
+          'n_estimators': 843,
+          'max_depth': 7,
+          'min_child_weight': 3,
+          'subsample': 0.6576877866257521,
+          'colsample_bytree': 0.8670126466945359,
+          'gamma': 0.5386742083894775,
+          'lambda': 0.12559455867301336,
+          'scale_pos_weight': 4.5}
+
+    clf = XGBClassifier(**params, enable_categorical=True, n_jobs=-1)
+    clf.fit(X, y)
 
     # Save the model
-    joblib.dump(model, "model.joblib")
+    joblib.dump(clf, "model.joblib")
 
